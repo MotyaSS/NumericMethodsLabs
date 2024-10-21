@@ -57,10 +57,6 @@ func InvertMatrix(matrix [][]big.Rat) ([][]big.Rat, error) {
 					temp = new(big.Rat).Mul(factor, &augmentedMatrix[i][j])
 					augmentedMatrix[k][j].Sub(&augmentedMatrix[k][j], temp)
 				}
-				for _, row := range augmentedMatrix {
-					printBigRatSlice(row)
-				}
-				fmt.Println()
 			}
 		}
 
