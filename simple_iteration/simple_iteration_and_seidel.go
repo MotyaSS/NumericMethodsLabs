@@ -117,10 +117,22 @@ func SimpleIteration(matrix [][]float64, values []float64, targetPrecision float
 		}
 	}
 
-	// TODO: The norm check
-
 	// Making beta and alpha matrices
 	alpha, beta := calcAlphaBeta(matrix, values)
+
+	// The alpha norm calculation
+	alphaNorm := 0.0
+	for _, row := range alpha {
+		sum := 0.0
+		for _, elem := range row {
+			sum += math.Abs(elem)
+		}
+		alphaNorm = math.Max(alphaNorm, sum)
+	}
+
+	for i := range alpha {
+		alpha[i][i] = 0
+	}
 
 	// Iterations
 
@@ -137,15 +149,21 @@ func SimpleIteration(matrix [][]float64, values []float64, targetPrecision float
 		for i := range prevIterX {
 			prevIterX[i] = curIterX[i]
 		}
-		currentPrecision := math.Inf(1)
+		currentPrecision := math.Inf(-1)
 		if useSeidel {
 			curIterX = calcSeidelCurIterX(alpha, beta, prevIterX)
 		} else {
 			curIterX = calcCurIterX(alpha, beta, prevIterX)
 		}
+
+		// norm of x
 		for i := range curIterX {
-			currentPrecision = math.Min(currentPrecision, math.Abs(curIterX[i]-prevIterX[i]))
+			currentPrecision = math.Max(currentPrecision, math.Abs(curIterX[i]-prevIterX[i]))
 		}
+		if alphaNorm < 1 {
+			currentPrecision *= alphaNorm * (1 - alphaNorm)
+		}
+
 		if currentPrecision <= targetPrecision {
 			break
 		}

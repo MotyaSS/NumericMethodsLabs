@@ -173,7 +173,7 @@ func isInverse(A, B [][]big.Rat) (bool, error) {
 
 func ExampleSimpleIteration() {
 	fmt.Println("Simple iteration:")
-	values, iterCnt, err := simple_iteration_algo.SimpleIterationFromFile("test/test3.txt", 0.0001)
+	values, iterCnt, err := simple_iteration_algo.SimpleIterationFromFile("test/test3.txt", 0.000001)
 	if err != nil {
 		fmt.Println(err)
 		return
@@ -182,7 +182,7 @@ func ExampleSimpleIteration() {
 	fmt.Println()
 
 	fmt.Println("Simple iteration with Seidel's optimisation:")
-	values, iterCnt, err = simple_iteration_algo.SeidelFromFile("test3.txt", 0.0001)
+	values, iterCnt, err = simple_iteration_algo.SeidelFromFile("test/test3.txt", 0.000001)
 	if err != nil {
 		fmt.Println(err)
 		return
