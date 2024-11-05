@@ -104,16 +104,16 @@ func calcAlphaBeta(matrix [][]float64, values []float64) ([][]float64, []float64
 func SimpleIteration(matrix [][]float64, values []float64, targetPrecision float64, useSeidel bool) ([]float64, int64, error) {
 	dim := len(matrix)
 	if dim == 0 {
-		return make([]float64, 0), 0, fmt.Errorf("matrix is empty")
+		return nil, 0, fmt.Errorf("matrix is empty")
 	}
 	if targetPrecision <= 0 {
-		return make([]float64, 0), 0, fmt.Errorf("target precision must be positive")
+		return nil, 0, fmt.Errorf("target precision must be positive")
 	}
 
 	// TODO: if any matrix[i][i] == 0 try to swap rows
 	for i := 0; i < dim; i++ {
 		if matrix[i][i] == 0 {
-			return make([]float64, 0), 0, fmt.Errorf("zero on main diagonal")
+			return nil, 0, fmt.Errorf("zero on main diagonal")
 		}
 	}
 
