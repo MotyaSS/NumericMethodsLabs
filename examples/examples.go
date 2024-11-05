@@ -2,7 +2,8 @@ package examples
 
 import (
 	"Chislaki/gauss_algo"
-	simple_iteration_algo "Chislaki/simple_iteration"
+	"Chislaki/rotation_algo"
+	"Chislaki/simple_iteration"
 	"Chislaki/thomas_algo"
 	"bufio"
 	"fmt"
@@ -188,4 +189,41 @@ func ExampleSimpleIteration() {
 		return
 	}
 	fmt.Println("Solution: ", values, "\nIterations:", iterCnt)
+}
+
+func ExampleRotations() {
+	values, vectors, err := rotation_algo.RotationsFromFile("test/test4.txt", 0.000001)
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+	fmt.Println("vectors:")
+	for _, vector := range vectors {
+		fmt.Println(vector)
+	}
+	fmt.Println("Orthogonal: ", checkOrthogonality(vectors))
+	fmt.Println("values:")
+	fmt.Println(values)
+
+}
+
+func checkOrthogonality(eigenvectors [][]float64) bool {
+	for i := range eigenvectors {
+		for j := range eigenvectors {
+			if i != j {
+				if scalarProduct(eigenvectors[i], eigenvectors[j]) > 1e-6 {
+					return false
+				}
+			}
+		}
+	}
+	return true
+}
+
+func scalarProduct(v1 []float64, v2 []float64) float64 {
+	res := 0.
+	for i := range v1 {
+		res += v1[i] * v2[i]
+	}
+	return res
 }
