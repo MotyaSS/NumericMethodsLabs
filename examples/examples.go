@@ -197,14 +197,20 @@ func ExampleRotations() {
 		fmt.Println(err)
 		return
 	}
+	fmt.Printf("Rotations\nvalues:\n %v\n", values)
 	fmt.Println("vectors:")
 	for _, vector := range vectors {
-		fmt.Println(vector)
+		fmt.Printf(" %v\n", vector)
 	}
 	fmt.Println("Orthogonal: ", checkOrthogonality(vectors))
-	fmt.Println("values:")
-	fmt.Println(values)
-
+	fmt.Printf("----------\nPower Iterations:\n")
+	specRadius, err := rotation_algo.PowerIterationsFromFile("test/test4.txt", 0.000001)
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+	fmt.Println("spectral radius:")
+	fmt.Printf(" %v", specRadius)
 }
 
 func checkOrthogonality(eigenvectors [][]float64) bool {

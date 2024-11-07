@@ -41,10 +41,9 @@ func ReadMatrix(filename string) (matrix [][]float64, err error) {
 	return matrix, nil
 }
 
+// region Rotations method
+
 func RotationsFromFile(filename string, targetPrecision float64) (eigenvalues []float64, eigenvectors [][]float64, err error) {
-	if targetPrecision <= 0 {
-		return nil, nil, fmt.Errorf("precision must be above zero")
-	}
 	matrix, err := ReadMatrix(filename)
 	if err != nil {
 		return nil, nil, err
@@ -53,6 +52,12 @@ func RotationsFromFile(filename string, targetPrecision float64) (eigenvalues []
 }
 
 func Rotations(matrix [][]float64, targetPrecision float64) (eigenvalues []float64, eigenvectors [][]float64, err error) {
+	if targetPrecision <= 0 {
+		return nil, nil, fmt.Errorf("precision must be above zero")
+	}
+	if !isSymmetrical(matrix) {
+		return nil, nil, fmt.Errorf("matrix isn't symmetrical")
+	}
 	aMatrix := CopyMatrix(matrix)
 	eigenvectors = getIdentityMatrix(len(aMatrix))
 	curPrecision := math.Inf(1)
@@ -74,15 +79,6 @@ func Rotations(matrix [][]float64, targetPrecision float64) (eigenvalues []float
 	eigenvalues = make([]float64, len(aMatrix))
 	for i := range aMatrix {
 		eigenvalues[i] = aMatrix[i][i]
-	}
-	return
-}
-
-func CopyMatrix(matrix [][]float64) (res [][]float64) {
-	res = make([][]float64, len(matrix))
-	for i := range matrix {
-		res[i] = make([]float64, len(matrix[i]))
-		copy(res[i], matrix[i])
 	}
 	return
 }
@@ -114,6 +110,68 @@ func getRotationMatrix(matrix [][]float64, row, clm int) [][]float64 {
 	res[clm][row] = sin
 	res[clm][clm] = cos
 	return res
+}
+
+// endregion Rotations method
+
+// region Power Iterations method
+
+func PowerIterationsFromFile(filename string, targetPrecision float64) (specRadius float64, err error) {
+	matrix, err := ReadMatrix(filename)
+	if err != nil {
+		return 0, err
+	}
+	return PowerIterations(matrix, targetPrecision)
+}
+
+func PowerIterations(matrix [][]float64, targetPrecision float64) (spectralRadius float64, err error) {
+	if targetPrecision <= 0 {
+		return 0, fmt.Errorf("precision must be above zero")
+	}
+	if !isSymmetrical(matrix) {
+		return 0, fmt.Errorf("matrix isn't symmetrical")
+	}
+
+	dim := len(matrix)
+	var yCur []float64
+	yPrev := make([]float64, dim)
+
+	for i := 0; i < dim; i++ {
+		yPrev[i] = 1
+	}
+
+	curPrecision := math.Inf(1)
+	prevSpecRadius := math.Inf(1)
+
+	for curPrecision > targetPrecision {
+		yCur = multiplyMatrixVector(matrix, yPrev)
+		spectralRadius = yCur[1] / yPrev[1]
+		norm := getVectorNorm(yCur)
+		for i := range yCur {
+			yCur[i] /= norm
+		}
+
+		curPrecision = math.Abs(spectralRadius - prevSpecRadius)
+		prevSpecRadius = spectralRadius
+		yPrev = yCur
+	}
+	return
+}
+
+// endregion Power Iterations method
+
+// region matrix and vector operations
+
+func isSymmetrical(matrix [][]float64) bool {
+
+	for i := range matrix {
+		for j := i + 1; j < len(matrix[i]); j++ {
+			if matrix[i][j] != matrix[j][i] {
+				return false
+			}
+		}
+	}
+	return true
 }
 
 func getIdentityMatrix(dim int) [][]float64 {
@@ -153,3 +211,32 @@ func transposeMatrix(matrix [][]float64) (res [][]float64) {
 	}
 	return
 }
+
+func multiplyMatrixVector(matrix [][]float64, vector []float64) (res []float64) {
+	res = make([]float64, len(matrix))
+	for i := range res {
+		for j := range matrix {
+			res[i] += matrix[i][j] * vector[j]
+		}
+	}
+	return
+}
+
+func getVectorNorm(vector []float64) float64 {
+	norm := 0.
+	for _, elem := range vector {
+		norm = math.Max(norm, math.Abs(elem))
+	}
+	return norm
+}
+
+func CopyMatrix(matrix [][]float64) (res [][]float64) {
+	res = make([][]float64, len(matrix))
+	for i := range matrix {
+		res[i] = make([]float64, len(matrix[i]))
+		copy(res[i], matrix[i])
+	}
+	return
+}
+
+// endregion matrix and vector operations
