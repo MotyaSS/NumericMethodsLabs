@@ -75,6 +75,7 @@ func Rotations(matrix [][]float64, targetPrecision float64) (eigenvalues []float
 				}
 			}
 		}
+		curPrecision = math.Sqrt(curPrecision)
 	}
 	eigenvalues = make([]float64, len(aMatrix))
 	for i := range aMatrix {
