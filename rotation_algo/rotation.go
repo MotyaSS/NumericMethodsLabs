@@ -64,7 +64,7 @@ func Rotations(matrix [][]float64, targetPrecision float64) (eigenvalues []float
 	for curPrecision > targetPrecision {
 		row, clm := findMaxAbsNonDiagonalPos(aMatrix)
 		rotationMatrix := getRotationMatrix(aMatrix, row, clm)
-		aMatrix = multiplyMatrices(multiplyMatrices(rotationMatrix, aMatrix), transposeMatrix(rotationMatrix))
+		aMatrix = multiplyMatrices(multiplyMatrices(transposeMatrix(rotationMatrix), aMatrix), rotationMatrix)
 		eigenvectors = multiplyMatrices(eigenvectors, rotationMatrix)
 		// Calculate precision
 		curPrecision = 0
@@ -77,24 +77,35 @@ func Rotations(matrix [][]float64, targetPrecision float64) (eigenvalues []float
 		}
 		curPrecision = math.Sqrt(curPrecision)
 	}
+
 	eigenvalues = make([]float64, len(aMatrix))
 	for i := range aMatrix {
 		eigenvalues[i] = aMatrix[i][i]
 	}
+
+	// НОРМИРОВКА
+	eigenvectors = transposeMatrix(eigenvectors)
+	for i := range eigenvectors {
+		norm := getVectorNorm(eigenvectors[i])
+		for j := range eigenvectors[i] {
+			eigenvectors[i][j] /= norm
+		}
+	}
+
 	return
 }
 
 func findMaxAbsNonDiagonalPos(matrix [][]float64) (row int, column int) {
-	rowM, clmM := 0, 1
+	row, column = 0, 1
 	for i := range matrix {
 		for j := i + 1; j < len(matrix[i]); j++ {
-			if math.Abs(matrix[i][j]) > math.Abs(matrix[rowM][clmM]) {
-				rowM = i
-				clmM = j
+			if math.Abs(matrix[i][j]) > math.Abs(matrix[row][column]) {
+				row = i
+				column = j
 			}
 		}
 	}
-	return rowM, clmM
+	return
 }
 
 func getRotationMatrix(matrix [][]float64, row, clm int) [][]float64 {
@@ -117,20 +128,20 @@ func getRotationMatrix(matrix [][]float64, row, clm int) [][]float64 {
 
 // region Power Iterations method
 
-func PowerIterationsFromFile(filename string, targetPrecision float64) (specRadius float64, err error) {
+func PowerIterationsFromFile(filename string, targetPrecision float64) (specRadius float64, eigenVector []float64, err error) {
 	matrix, err := ReadMatrix(filename)
 	if err != nil {
-		return 0, err
+		return 0, nil, err
 	}
 	return PowerIterations(matrix, targetPrecision)
 }
 
-func PowerIterations(matrix [][]float64, targetPrecision float64) (spectralRadius float64, err error) {
+func PowerIterations(matrix [][]float64, targetPrecision float64) (spectralRadius float64, eigenVector []float64, err error) {
 	if targetPrecision <= 0 {
-		return 0, fmt.Errorf("precision must be above zero")
+		return 0, nil, fmt.Errorf("precision must be above zero")
 	}
 	if !isSymmetrical(matrix) {
-		return 0, fmt.Errorf("matrix isn't symmetrical")
+		return 0, nil, fmt.Errorf("matrix isn't symmetrical")
 	}
 
 	dim := len(matrix)
@@ -143,7 +154,7 @@ func PowerIterations(matrix [][]float64, targetPrecision float64) (spectralRadiu
 
 	curPrecision := math.Inf(1)
 	prevSpecRadius := math.Inf(1)
-
+	eigenVector = make([]float64, dim)
 	for curPrecision > targetPrecision {
 		yCur = multiplyMatrixVector(matrix, yPrev)
 		spectralRadius = yCur[1] / yPrev[1]
@@ -151,6 +162,7 @@ func PowerIterations(matrix [][]float64, targetPrecision float64) (spectralRadiu
 		for i := range yCur {
 			yCur[i] /= norm
 		}
+		copy(eigenVector, yPrev)
 
 		curPrecision = math.Abs(spectralRadius - prevSpecRadius)
 		prevSpecRadius = spectralRadius

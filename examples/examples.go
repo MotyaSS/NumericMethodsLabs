@@ -19,7 +19,6 @@ func PrintBigRatSlice(slice []big.Rat) {
 	fmt.Println()
 }
 
-// ReadMatrixFromFile reads a matrix and corresponding values from a file.
 func readMatrixFromFile(filename string) ([][]big.Rat, []big.Rat, error) {
 	file, err := os.Open(filename)
 	if err != nil {
@@ -192,7 +191,7 @@ func ExampleSimpleIteration() {
 }
 
 func ExampleRotations() {
-	values, vectors, err := rotation_algo.RotationsFromFile("test/test4.txt", 0.000001)
+	values, vectors, err := rotation_algo.RotationsFromFile("test/test4.txt", 0.00001)
 	if err != nil {
 		fmt.Println(err)
 		return
@@ -204,13 +203,12 @@ func ExampleRotations() {
 	}
 	fmt.Println("Orthogonal: ", checkOrthogonality(vectors))
 	fmt.Printf("----------\nPower Iterations:\n")
-	specRadius, err := rotation_algo.PowerIterationsFromFile("test/test4.txt", 0.000001)
+	specRadius, specEVector, err := rotation_algo.PowerIterationsFromFile("test/test4.txt", 0.0001)
 	if err != nil {
 		fmt.Println(err)
 		return
 	}
-	fmt.Println("spectral radius:")
-	fmt.Printf(" %v", specRadius)
+	fmt.Printf("spectral radius:\n %v\neigen vector for spec. radius:\n %v", specRadius, specEVector)
 }
 
 func checkOrthogonality(eigenvectors [][]float64) bool {
