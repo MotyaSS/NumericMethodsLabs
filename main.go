@@ -1,10 +1,9 @@
 package main
 
-import "Chislaki/examples"
+import (
+	"Chislaki/2pack/examples"
+)
 
 func main() {
-	examples.ExampleRotations()
-	//examples.ExampleSimpleIteration()
-	//examples.ExampleThomas()
-	//examples.ExampleGauss()
+	examples.ExampleEquationSolve()
 }
