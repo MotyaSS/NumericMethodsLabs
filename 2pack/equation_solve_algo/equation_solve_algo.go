@@ -2,6 +2,7 @@ package equation_solve_algo
 
 import (
 	"errors"
+	"fmt"
 	"math"
 )
 
@@ -46,7 +47,7 @@ func Secant(f func(float64) float64, x0, x1, epsilon float64) (float64, error) {
 
 func SimpleIteration(f func(float64) float64, a, b, epsilon float64) (float64, error) {
 	if a >= b {
-		return 0, errors.New("invalid interval: a must be less than b")
+		return 0, fmt.Errorf("invalid interval: a must be less than b")
 	}
 
 	x := (a + b) / 2
