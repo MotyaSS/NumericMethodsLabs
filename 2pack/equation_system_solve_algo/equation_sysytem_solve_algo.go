@@ -4,60 +4,34 @@ import (
 	"math"
 )
 
-//x1 = sqrt(2lgx_2 + 1)
-
-//x2 = (x_1^2 + a)/ax_1
-
-func SimpleIteration(
-	eq1, eq2, dEq1, dEq2 func(float64, float64) float64,
-	firstX, firstY float64,
-	eps float64,
-) (float64, float64) {
-	prevX1 := firstX
-	prevX2 := firstY
-	currX1 := eq1(prevX1, prevX2)
-	currX2 := eq2(prevX1, prevX2)
+// SimpleIterations solves system of two equations with Simple Iterations method
+func SimpleIterations(f1, f2 func(float64, float64) float64, x10, x20 float64, epsilon float64) (float64, float64, error) {
+	x1, x2 := x10, x20
 	for {
-		q := math.Max(dEq1(currX1, currX2), dEq2(currX1, currX2))
-		if q/(1-q)*math.Max(math.Abs(currX1-prevX1), math.Abs(currX2-prevX2)) < eps {
-			return currX1, currX2
+		nextX1 := f1(x1, x2)
+		nextX2 := f2(x1, x2)
+		if math.Abs(nextX1-x1) < epsilon && math.Abs(nextX2-x2) < epsilon {
+			return nextX1, nextX2, nil
 		}
-		prevX1 = currX1
-		prevX2 = currX2
-		currX1 = eq1(prevX1, prevX2)
-		currX2 = eq2(prevX1, prevX2)
+		x1, x2 = nextX1, nextX2
 	}
 }
 
-func findDeterminant(a, b, c, d float64) float64 {
-	return a*d - b*c
-}
+func NewtonMethod(f func(*Matrix) *Matrix,
+	j func(*Matrix) *Matrix,
+	x *Matrix, eps float64) *Matrix {
 
-func Newton(
-	eq1, eq2, dEq1X1, dEq1X2, dEq2X1, dEq2X2 func(float64, float64) float64,
-	xFirst, yFirst float64,
-	eps float64,
-) (float64, float64) {
-	prevX := xFirst
-	prevY := yFirst
-
+	var prevX *Matrix
 	for {
-		dF1x1 := dEq1X1(prevX, prevY)
-		dF1x2 := dEq1X2(prevX, prevY)
-		dF2x1 := dEq2X1(prevX, prevY)
-		dF2x2 := dEq2X2(prevX, prevY)
+		prevX = x
+		jacobian := j(x)
+		fx := f(x)
+		delta := jacobian.InverseMatrix().Multiply(fx)
+		x = x.Subtract(delta)
 
-		f1 := eq1(prevX, prevY)
-		f2 := eq2(prevX, prevY)
-
-		J := findDeterminant(dF1x1, dF1x2, dF2x1, dF2x2)
-		A1 := findDeterminant(f1, dF1x2, f2, dF2x2)
-		A2 := findDeterminant(dF1x1, f1, dF2x1, f2)
-		curX := prevX - A1/J
-		curY := prevY - A2/J
-		if math.Max(math.Abs(curX-prevX), math.Abs(curY-prevY)) < eps {
-			return curX, curY
+		if x.Subtract(prevX).VecNormC() <= eps {
+			break
 		}
-		prevX, prevY = curX, curY
 	}
+	return x
 }
