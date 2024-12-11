@@ -1,10 +1,11 @@
 package main
 
 import (
-	"Chislaki/2pack/examples"
+	ex3 "Chislaki/3pack/examples"
 )
 
 func main() {
-	examples.ExampleEquationSolve()
-
+	//ex2.ExampleSystemSolve()
+	//ex3.CubicSplineExample()
+	ex3.ExampleIntegration()
 }

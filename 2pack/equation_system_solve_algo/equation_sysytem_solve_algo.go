@@ -4,7 +4,6 @@ import (
 	"math"
 )
 
-// SimpleIterations solves system of two equations with Simple Iterations method
 func SimpleIterations(f1, f2 func(float64, float64) float64, x10, x20 float64, epsilon float64) (float64, float64, error) {
 	x1, x2 := x10, x20
 	for {
@@ -17,9 +16,7 @@ func SimpleIterations(f1, f2 func(float64, float64) float64, x10, x20 float64, e
 	}
 }
 
-func NewtonMethod(f func(*Matrix) *Matrix,
-	j func(*Matrix) *Matrix,
-	x *Matrix, eps float64) *Matrix {
+func NewtonMethod(f func(*Matrix) *Matrix, j func(*Matrix) *Matrix, x *Matrix, eps float64) *Matrix {
 
 	var prevX *Matrix
 	for {
